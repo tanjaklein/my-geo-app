@@ -17,7 +17,11 @@ function App() {
  // Amplify.configure(awsExports);
   
 
-  return <MapView/>
+  return <MapView 
+  initialViewState={{latitude: -26.117959,
+    longitude: 28.173217,
+    zoom:7
+  }}/>
 }
 
 export default App
