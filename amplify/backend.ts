@@ -1,6 +1,6 @@
 import { defineBackend } from "@aws-amplify/backend";
 import { Policy, PolicyStatement } from "aws-cdk-lib/aws-iam";
-import { CfnMap } from "aws-cdk-lib/aws-location";
+import { CfnMap, CfnPlaceIndex } from "aws-cdk-lib/aws-location";
 import { Stack } from "aws-cdk-lib/core";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
@@ -49,6 +49,45 @@ const myGeoPolicy = new Policy(geoStack, "GeoPolicy", {
 backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(myGeoPolicy);
 backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(myGeoPolicy);
 
+
+// create a location services place index
+const myIndex = new CfnPlaceIndex(geoStack, "PlaceIndex", {
+  dataSource: "Here",
+  dataSourceConfiguration: {
+    intendedUse: "SingleUse",
+  },
+  indexName: "myPlaceIndex",
+  pricingPlan: "RequestBasedUsage",
+  tags: [
+    {
+      key: "name",
+      value: "myPlaceIndex",
+    },
+  ],
+});
+
+
+// create a policy to allow access to the place index
+const myIndexPolicy = new Policy(geoStack, "IndexPolicy", {
+  policyName: "myIndexPolicy",
+  statements: [
+    new PolicyStatement({
+      actions: [
+        "geo:SearchPlaceIndexForPosition",
+        "geo:SearchPlaceIndexForText",
+        "geo:SearchPlaceIndexForSuggestions",
+        "geo:GetPlace",
+      ],
+      resources: [myIndex.attrArn],
+    }),
+  ],
+});
+
+
+// attach the policy to the authenticated and unauthenticated IAM roles
+backend.auth.resources.authenticatedUserIamRole.attachInlinePolicy(myIndexPolicy);
+backend.auth.resources.unauthenticatedUserIamRole.attachInlinePolicy(myIndexPolicy);
+
 // patch the map resource to the expected output configuration
 backend.addOutput({
   geo: {
@@ -60,6 +99,11 @@ backend.addOutput({
         },
       },
       default: map.mapName,
+    },
+    
+    search_indices: {
+      default: myIndex.indexName,
+      items: [myIndex.indexName],
     },
   },
 });
