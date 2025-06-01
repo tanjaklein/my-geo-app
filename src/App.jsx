@@ -20,7 +20,7 @@ function App() {
   return <MapView 
   initialViewState={{latitude: -26.117959,
     longitude: 28.173217,
-    zoom:7
+    zoom:16
   }}/>
 }
 
