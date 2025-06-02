@@ -11,6 +11,7 @@ import '@aws-amplify/ui-react-geo/styles.css';
 import * as React from 'react';
 import { Button } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { Hikes } from './ui-components/Hikes';
 
 
 //import awsExports from './aws-exports.json';
@@ -23,7 +24,8 @@ function App() {
   
 
   return (
-    <Button variation="primary">Hello world</Button>
+   
+    <Hikes/>
   )
 }
 
